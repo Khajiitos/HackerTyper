@@ -13,6 +13,9 @@ Problems with this:
     number of lines the whole screen can fit
 
 -   Over 500 lines before the code even starts lol
+
+-   If you click way too fast you might crash the room
+    because runtime might exceed 40ms in 4 seconds
 ]]
 
 code = [[struct group_info init_groups = { .usage = ATOMIC_INIT(2) };
@@ -547,6 +550,8 @@ int in_egroup_p(gid_t grp)
 }
 ]]
 
+codeLength = #code
+
 tfm.exec.disableAfkDeath(true)
 tfm.exec.disableAutoNewGame(true)
 tfm.exec.disableAutoScore(true)
@@ -593,9 +598,20 @@ function updateText(playerName)
     ui.updateTextArea(1, '<font color="#00FF00">' .. text .. '</font>', playerName)
 end
 
+function showAccessGranted(playerName)
+    ui.addTextArea(2, '<p align="center"><font size="32" color="#00FF00">ACCESS GRANTED</font></p>', playerName, 300, 125, 200, 90, 0x333333, 0x999999, 1.0, true)
+end
+
 function eventKeyboard(playerName, keyCode, down, xPlayerPosition, yPlayerPosition)
-    playerCharacters[playerName] = playerCharacters[playerName] + 3
-    updateText(playerName)
+    if playerCharacters[playerName] ~= -1 then
+        playerCharacters[playerName] = playerCharacters[playerName] + 3
+        if playerCharacters[playerName] >= codeLength then
+            playerCharacters[playerName] = -1
+            showAccessGranted(playerName)
+        else 
+            updateText(playerName)
+        end
+    end
 end
 
 for playerName in pairs(tfm.get.room.playerList) do
