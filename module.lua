@@ -41,17 +41,17 @@ struct group_info *groups_alloc(int gidsetsize){
 
 		return NULL;
 
-	group_info-&gt; ngroups = gidsetsize;
+	group_info-&gt;ngroups = gidsetsize;
 
-	group_info-&gt; nblocks = nblocks;
+	group_info-&gt;nblocks = nblocks;
 
-	atomic_set(&group_info-&gt; usage, 1);
+	atomic_set(&group_info-&gt;usage, 1);
 
 
 
 	if (gidsetsize &lt;= NGROUPS_SMALL)
 
-		group_info-&gt; blocks[0] = group_info-&gt; small_block;
+		group_info-&gt;blocks[0] = group_info-&gt;small_block;
 
 	else {
 
@@ -65,7 +65,7 @@ struct group_info *groups_alloc(int gidsetsize){
 
 				goto out_undo_partial_alloc;
 
-			group_info-&gt; blocks[i] = b;
+			group_info-&gt;blocks[i] = b;
 
 		}
 
@@ -77,9 +77,9 @@ struct group_info *groups_alloc(int gidsetsize){
 
 out_undo_partial_alloc:
 
-	while (--i &gt; = 0) {
+	while (--i &gt;= 0) {
 
-		free_page((unsigned long)group_info-&gt; blocks[i]);
+		free_page((unsigned long)group_info-&gt;blocks[i]);
 
 	}
 
@@ -99,13 +99,13 @@ void groups_free(struct group_info *group_info)
 
 {
 
-	if (group_info-&gt; blocks[0] != group_info-&gt; small_block) {
+	if (group_info-&gt;blocks[0] != group_info-&gt;small_block) {
 
 		int i;
 
-		for (i = 0; i &lt; group_info-&gt; nblocks; i++)
+		for (i = 0; i &lt; group_info-&gt;nblocks; i++)
 
-			free_page((unsigned long)group_info-&gt; blocks[i]);
+			free_page((unsigned long)group_info-&gt;blocks[i]);
 
 	}
 
@@ -129,11 +129,11 @@ static int groups_to_user(gid_t __user *grouplist,
 
 	int i;
 
-	unsigned int count = group_info-&gt; ngroups;
+	unsigned int count = group_info-&gt;ngroups;
 
 
 
-	for (i = 0; i &lt; group_info-&gt; nblocks; i++) {
+	for (i = 0; i &lt; group_info-&gt;nblocks; i++) {
 
 		unsigned int cp_count = min(NGROUPS_PER_BLOCK, count);
 
@@ -141,7 +141,7 @@ static int groups_to_user(gid_t __user *grouplist,
 
 
 
-		if (copy_to_user(grouplist, group_info-&gt; blocks[i], len))
+		if (copy_to_user(grouplist, group_info-&gt;blocks[i], len))
 
 			return -EFAULT;
 
@@ -169,11 +169,11 @@ static int groups_from_user(struct group_info *group_info,
 
 	int i;
 
-	unsigned int count = group_info-&gt; ngroups;
+	unsigned int count = group_info-&gt;ngroups;
 
 
 
-	for (i = 0; i &lt; group_info-&gt; nblocks; i++) {
+	for (i = 0; i &lt; group_info-&gt;nblocks; i++) {
 
 		unsigned int cp_count = min(NGROUPS_PER_BLOCK, count);
 
@@ -181,7 +181,7 @@ static int groups_from_user(struct group_info *group_info,
 
 
 
-		if (copy_from_user(group_info-&gt; blocks[i], grouplist, len))
+		if (copy_from_user(group_info-&gt;blocks[i], grouplist, len))
 
 			return -EFAULT;
 
@@ -207,7 +207,7 @@ static void groups_sort(struct group_info *group_info)
 
 	int base, max, stride;
 
-	int gidsetsize = group_info-&gt; ngroups;
+	int gidsetsize = group_info-&gt;ngroups;
 
 
 
@@ -233,7 +233,7 @@ static void groups_sort(struct group_info *group_info)
 
 
 
-			while (left &gt; = 0 && GROUP_AT(group_info, left) &gt;  tmp) {
+			while (left &gt;= 0 && GROUP_AT(group_info, left) &gt; tmp) {
 
 				GROUP_AT(group_info, right) =
 
@@ -275,13 +275,13 @@ int groups_search(const struct group_info *group_info, gid_t grp)
 
 	left = 0;
 
-	right = group_info-&gt; ngroups;
+	right = group_info-&gt;ngroups;
 
 	while (left &lt; right) {
 
 		unsigned int mid = (left+right)/2;
 
-		if (grp &gt;  GROUP_AT(group_info, mid))
+		if (grp &gt; GROUP_AT(group_info, mid))
 
 			left = mid + 1;
 
@@ -321,13 +321,13 @@ int set_groups(struct cred *new, struct group_info *group_info)
 
 {
 
-	put_group_info(new-&gt; group_info);
+	put_group_info(new-&gt;group_info);
 
 	groups_sort(group_info);
 
 	get_group_info(group_info);
 
-	new-&gt; group_info = group_info;
+	new-&gt;group_info = group_info;
 
 	return 0;
 
@@ -411,11 +411,11 @@ SYSCALL_DEFINE2(getgroups, int, gidsetsize, gid_t __user *, grouplist)
 
 	/* no need to grab task_lock here; it cannot change */
 
-	i = cred-&gt; group_info-&gt; ngroups;
+	i = cred-&gt;group_info-&gt;ngroups;
 
 	if (gidsetsize) {
 
-		if (i &gt;  gidsetsize) {
+		if (i &gt; gidsetsize) {
 
 			i = -EINVAL;
 
@@ -423,7 +423,7 @@ SYSCALL_DEFINE2(getgroups, int, gidsetsize, gid_t __user *, grouplist)
 
 		}
 
-		if (groups_to_user(grouplist, cred-&gt; group_info)) {
+		if (groups_to_user(grouplist, cred-&gt;group_info)) {
 
 			i = -EFAULT;
 
@@ -465,7 +465,7 @@ SYSCALL_DEFINE2(setgroups, int, gidsetsize, gid_t __user *, grouplist)
 
 		return -EPERM;
 
-	if ((unsigned)gidsetsize &gt;  NGROUPS_MAX)
+	if ((unsigned)gidsetsize &gt; NGROUPS_MAX)
 
 		return -EINVAL;
 
@@ -517,9 +517,9 @@ int in_group_p(gid_t grp)
 
 
 
-	if (grp != cred-&gt; fsgid)
+	if (grp != cred-&gt;fsgid)
 
-		retval = groups_search(cred-&gt; group_info, grp);
+		retval = groups_search(cred-&gt;group_info, grp);
 
 	return retval;
 
@@ -541,9 +541,9 @@ int in_egroup_p(gid_t grp)
 
 
 
-	if (grp != cred-&gt; egid)
+	if (grp != cred-&gt;egid)
 
-		retval = groups_search(cred-&gt; group_info, grp);
+		retval = groups_search(cred-&gt;group_info, grp);
 
 	return retval;
 
@@ -606,6 +606,8 @@ function eventKeyboard(playerName, keyCode, down, xPlayerPosition, yPlayerPositi
     if playerCharacters[playerName] ~= -1 then
         playerCharacters[playerName] = playerCharacters[playerName] + 3
         if playerCharacters[playerName] >= codeLength then
+			playerCharacters[playerName] = codeLength
+			updateText(playerName)
             playerCharacters[playerName] = -1
             showAccessGranted(playerName)
         else 
