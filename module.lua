@@ -614,6 +614,10 @@ function eventKeyboard(playerName, keyCode, down, xPlayerPosition, yPlayerPositi
     end
 end
 
+function eventNewPlayer(playerName)
+	initPlayer(playerName)
+end
+
 for playerName in pairs(tfm.get.room.playerList) do
     initPlayer(playerName)
 end
